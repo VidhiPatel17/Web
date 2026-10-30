@@ -17,6 +17,7 @@
   --ink-faint:      #755B47;
 
   --gold:           #7C5A18;   /* text gold on parchment (AA body) */
+  --gold-ink:       #57390A;   /* deep gold for small caps over pattern */
   --gold-line:      #BE9A55;   /* hairlines, icons */
   --gold-soft:      #A8823A;
   --gold-light:     #E9D2A0;   /* gold on wine */
@@ -119,25 +120,46 @@ a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 3
 }
 
 /* type primitives */
+/* Great Vibes ships a single hairline weight, so over the damask its thin
+   strokes disappear. A sub-pixel stroke thickens the glyphs without swapping
+   the face; the halo stays tight so the pattern still reads between letters. */
 .script {
   font-family: var(--font-script);
   font-weight: 400;
   line-height: 1.06;
   letter-spacing: 0.005em;
   color: var(--ink);
+  --script-halo: 247, 240, 227;
+  -webkit-text-stroke: 0.28px currentColor;
+  paint-order: stroke fill;
+  text-shadow: 0 0 7px rgba(var(--script-halo), 0.5), 0 1px 1px rgba(53, 32, 15, 0.16);
 }
 .script--lg { font-size: clamp(2.5rem, 4.6vw, 4.1rem); }
-.script--xl { font-size: clamp(2.9rem, 6vw, 5.4rem); }
+.script--xl {
+  font-size: clamp(2.9rem, 6vw, 5.4rem);
+  -webkit-text-stroke-width: 0.45px;
+}
+/* on wine grounds the halo has to be dark, not parchment */
+.scroll__paper .script,
+.count .script {
+  --script-halo: 20, 6, 10;
+  text-shadow: 0 0 18px rgba(20, 6, 10, 0.55), 0 2px 6px rgba(20, 6, 10, 0.35);
+}
 
+/* small caps carry weight and a darker gold instead of a glow — a halo wide
+   enough to lift 12px type also wipes the pattern out around it */
 .kicker {
   font-family: var(--font-serif);
-  font-size: 0.78rem;
-  letter-spacing: 0.34em;
+  font-size: 0.82rem;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--gold);
-  font-weight: 600;
+  color: var(--gold-ink);
+  font-weight: 700;
 }
-.kicker--light { color: var(--gold-light); }
+.kicker--light {
+  color: var(--gold-light);
+  text-shadow: 0 1px 6px rgba(20, 6, 10, 0.55);
+}
 
 .sec-lede {
   max-width: 54ch;
@@ -241,7 +263,7 @@ a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 3
 
 .link-btn {
   font: inherit;
-  color: var(--gold);
+  color: var(--gold-ink);
   background: none;
   border: 0;
   padding: 0;
@@ -249,6 +271,7 @@ a { color: var(--gold); text-decoration-thickness: 1px; text-underline-offset: 3
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
+  font-weight: 600;
 }
 .link-btn:hover { color: var(--ink); }
 
@@ -328,7 +351,7 @@ main > section[id] { scroll-margin-top: 84px; }
   font-size: 0.68rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   padding-block: 6px;
   border-bottom: 1px solid transparent;
   transition: color 180ms var(--ease), border-color 180ms var(--ease);
@@ -505,11 +528,12 @@ main > section[id] { scroll-margin-top: 84px; }
 .hero__inner > * { position: relative; }
 
 .hero__blessing {
-  font-size: clamp(0.7rem, 0.9vw, 0.8rem);
-  letter-spacing: 0.32em;
+  font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #EDD49A;
-  font-weight: 600;
+  color: #F3DCA8;
+  font-weight: 700;
+  text-shadow: 0 1px 10px rgba(14, 4, 7, 0.8);
 }
 .hero__flourish {
   width: min(260px, 70%);
@@ -519,10 +543,11 @@ main > section[id] { scroll-margin-top: 84px; }
 }
 .hero__eyebrow {
   font-size: clamp(0.82rem, 1.1vw, 0.95rem);
-  letter-spacing: 0.26em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: rgba(255, 243, 223, 0.86);
-  font-weight: 600;
+  color: #FFF6E6;
+  font-weight: 700;
+  text-shadow: 0 1px 10px rgba(14, 4, 7, 0.75);
 }
 .hero__names {
   font-family: var(--font-script);
@@ -536,6 +561,15 @@ main > section[id] { scroll-margin-top: 84px; }
   gap: clamp(6px, 1.1vw, 18px);
   flex-wrap: wrap;
   text-shadow: 0 8px 44px rgba(18, 5, 9, 0.5);
+}
+.hero__names > span {
+  /* the lantern art sits directly behind the names, so the script leans on a
+     heavier stroke and a tight contact shadow rather than a wide dark wash */
+  -webkit-text-stroke: 0.45px currentColor;
+  text-shadow:
+    0 2px 6px rgba(18, 5, 9, 0.7),
+    0 0 20px rgba(18, 5, 9, 0.5),
+    0 10px 44px rgba(18, 5, 9, 0.35);
 }
 .hero__names em {
   font-style: normal;
@@ -559,8 +593,9 @@ main > section[id] { scroll-margin-top: 84px; }
   font-size: clamp(0.76rem, 1vw, 0.86rem);
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #F3E2C4;
-  font-weight: 600;
+  color: #FBF0D8;
+  font-weight: 700;
+  text-shadow: 0 1px 8px rgba(18, 5, 9, 0.55);
 }
 .hero__actions {
   display: flex;
@@ -628,9 +663,10 @@ main > section[id] { scroll-margin-top: 84px; }
 .date__core { position: relative; text-align: center; padding: 8px; }
 .date__day {
   font-size: 0.95rem;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 700;
   margin-bottom: 2px;
 }
 .date__num {
@@ -639,6 +675,8 @@ main > section[id] { scroll-margin-top: 84px; }
   line-height: 0.82;
   color: var(--wine);
   margin-block: 4px 0;
+  -webkit-text-stroke: 0.5px var(--wine);
+  text-shadow: 0 0 9px rgba(247, 240, 227, 0.55), 0 2px 3px rgba(53, 32, 15, 0.14);
 }
 .date__month {
   font-family: var(--font-script);
@@ -646,21 +684,25 @@ main > section[id] { scroll-margin-top: 84px; }
   line-height: 1;
   color: var(--ink);
   margin-top: 2px;
+  -webkit-text-stroke: 0.3px var(--ink);
+  text-shadow: 0 0 8px rgba(247, 240, 227, 0.55), 0 1px 1px rgba(53, 32, 15, 0.16);
 }
 .date__year {
   font-size: 0.9rem;
-  letter-spacing: 0.38em;
-  color: var(--ink-soft);
+  letter-spacing: 0.34em;
+  color: var(--ink);
+  font-weight: 600;
   margin-top: 10px;
-  padding-left: 0.38em;
+  padding-left: 0.34em;
 }
 .date__note {
   margin-top: 18px;
   font-size: 1.02rem;
   letter-spacing: 0.06em;
   color: var(--ink-soft);
+  font-weight: 500;
 }
-.date__note strong { color: var(--wine); font-weight: 600; }
+.date__note strong { color: var(--wine); font-weight: 700; }
 
 .date__lantern { position: absolute; width: clamp(40px, 5vw, 72px); opacity: 0.9; }
 .date__lantern--l { top: 16%; left: 6%; }
@@ -1030,11 +1072,11 @@ main > section[id] { scroll-margin-top: 84px; }
 }
 .milestone:nth-child(odd) p  { margin-left: auto; }
 .milestone__date {
-  font-size: 0.76rem !important;
-  letter-spacing: 0.2em;
+  font-size: 0.8rem !important;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gold) !important;
-  font-weight: 600;
+  color: var(--gold-ink) !important;
+  font-weight: 700;
   margin-top: 2px;
 }
 /* hairline reaching for the ribbon */
@@ -1187,11 +1229,12 @@ main > section[id] { scroll-margin-top: 84px; }
   opacity: clamp(0.05, calc((var(--p) - 0.32) * 3), 1);
 }
 .scroll__kicker {
-  font-size: 0.68rem;
-  letter-spacing: 0.34em;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--gold-light);
-  font-weight: 600;
+  color: #F1DCAE;
+  font-weight: 700;
+  text-shadow: 0 1px 8px rgba(20, 6, 10, 0.6);
 }
 .scroll__names {
   font-size: clamp(2.8rem, 6.4vw, 4.3rem);
@@ -1341,7 +1384,7 @@ main > section[id] { scroll-margin-top: 84px; }
 .ritual__no {
   font-size: 0.7rem;
   letter-spacing: 0.3em;
-  color: var(--gold);
+  color: var(--gold-ink);
   font-weight: 700;
 }
 .ritual h3 {
@@ -1352,9 +1395,10 @@ main > section[id] { scroll-margin-top: 84px; }
 }
 .ritual__when {
   font-size: 0.78rem;
-  letter-spacing: 0.17em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--ink-soft);
+  font-weight: 600;
 }
 .ritual__time {
   font-family: var(--font-script);
@@ -1542,7 +1586,7 @@ main > section[id] { scroll-margin-top: 84px; }
   margin-top: 18px;
   font-size: 0.74rem;
   letter-spacing: 0.14em;
-  color: rgba(233, 210, 160, 0.6);
+  color: rgba(240, 220, 180, 0.82);
 }
 
 /* ------------------------------------------------------------------ foot */
@@ -1568,16 +1612,16 @@ main > section[id] { scroll-margin-top: 84px; }
   gap: 2px;
 }
 .foot__mark i { font-style: normal; font-size: 0.66em; color: var(--gold-light); }
-.foot__names { font-size: 0.86rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-light); }
+.foot__names { font-size: 0.86rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-light); font-weight: 600; }
 .foot__names i { font-style: normal; }
-.foot__date { font-size: 0.8rem; letter-spacing: 0.16em; color: rgba(248, 235, 214, 0.7); }
-.foot__family { font-size: 0.9rem; font-style: italic; color: rgba(248, 235, 214, 0.66); margin-top: 6px; }
+.foot__date { font-size: 0.8rem; letter-spacing: 0.16em; color: rgba(250, 240, 222, 0.86); }
+.foot__family { font-size: 0.9rem; font-style: italic; color: rgba(250, 240, 222, 0.8); margin-top: 6px; }
 .foot__blessing {
   margin-top: 14px;
   font-size: 0.68rem;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: rgba(233, 210, 160, 0.5);
+  color: rgba(238, 217, 172, 0.78);
 }
 
 /* -------------------------------------------------------------- lightbox */
@@ -1790,7 +1834,8 @@ main > section[id] { scroll-margin-top: 84px; }
 .lantern-toggle {
   position: absolute;
   right: clamp(26px, 4.6vw, 78px);
-  bottom: 30px;
+  /* clear the fixed music pill in the opposite corner (18px + 46px tall) */
+  bottom: clamp(78px, 9vw, 96px);
   z-index: 4;
   display: inline-flex;
   align-items: center;
