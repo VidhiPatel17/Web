@@ -229,88 +229,213 @@
     window.addEventListener('resize', glowTick);
   }
 
-  /* ------------------------------------------- gallery rail (endless loop)
-     Three identical sets are laid side by side and the strip is parked on the
-     middle one. Whenever it comes to rest near either end it is nudged by
-     exactly one set-width, so the picture under the finger never changes and
-     the loop is invisible. Clones are hidden from assistive tech and from the
-     tab order, so there are still only twelve real photographs. */
-  var rail = document.getElementById('polaroids');
-  if (rail) {
-    var originals = Array.prototype.slice.call(rail.children);
-    var setSize = originals.length;
-    var railBtns = Array.prototype.slice.call(document.querySelectorAll('[data-gal]'));
+  /* ------------------------------------------------------------ carousels
+     One engine drives both rails on this page: the photograph strip in "Our
+     Story" and the diya wall in "Leave us a light". Both are scroll-snap strips
+     in the markup, so a swipe, a trackpad flick or the arrow keys move them
+     with scripting off; this only adds the arrows, the dots, the counter and
+     the slow slideshow over the photographs. */
+  var carousels = [];
 
-    function makeSet() {
-      return originals.map(function (card) {
-        var copy = card.cloneNode(true);
-        copy.setAttribute('data-clone', '1');
-        copy.setAttribute('aria-hidden', 'true');
-        copy.tabIndex = -1;
-        return copy;
+  function refreshCarousels() {
+    carousels.forEach(function (c) { c.refresh(); });
+  }
+
+  function buildCarousel(root) {
+    var track = root.querySelector('[data-carousel-track]');
+    if (!track) return null;
+
+    var dots = root.querySelector('[data-carousel-dots]');
+    var count = root.querySelector('[data-carousel-count]');
+    var total = root.querySelector('[data-carousel-total]');
+    var prev = root.querySelector('[data-carousel-prev]');
+    var next = root.querySelector('[data-carousel-next]');
+    var every = parseInt(root.getAttribute('data-autoplay'), 10) || 0;
+    var wraps = root.getAttribute('data-loop') !== 'false';
+
+    var slides = [];
+    var index = 0;
+    var timer = null;
+    var held = false;          // pointer or focus is inside the rail
+    var queued = false;
+
+    function collect() {
+      slides = Array.prototype.filter.call(track.children, function (el) {
+        return el.nodeType === 1;
       });
     }
 
-    if (setSize > 3) {
-      makeSet().forEach(function (c) { rail.insertBefore(c, rail.firstChild); });
-      makeSet().forEach(function (c) { rail.appendChild(c); });
+    function labelOf(slide, i) {
+      var explicit = slide.getAttribute('data-dot-label') || slide.getAttribute('aria-label');
+      var img = slide.querySelector('img[alt]');
+      var name = slide.querySelector('.diya__name');
+      var text = explicit || (img && img.alt) || (name && name.textContent) || '';
+      text = String(text).replace(/^\s*[\u2014-]\s*/, '').trim();
+      if (text.length > 46) text = text.slice(0, 45).trim() + '\u2026';
+      return text || 'slide ' + (i + 1);
     }
 
-    var nodes = Array.prototype.slice.call(rail.children);
-    var setWidth = 0;
+    function drawDots() {
+      if (!dots) return;
+      dots.textContent = '';
+      slides.forEach(function (slide, i) {
+        var li = document.createElement('li');
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'carousel__dot';
+        btn.setAttribute('aria-label', 'Go to ' + labelOf(slide, i));
+        btn.addEventListener('click', function () { goTo(i); });
+        li.appendChild(btn);
+        dots.appendChild(li);
+      });
+    }
 
-    function measure() {
-      if (nodes.length > setSize) {
-        setWidth = nodes[setSize].offsetLeft - nodes[0].offsetLeft;
+    function paint() {
+      if (dots) {
+        /* a guest book can hold sixty wishes, and sixty dots wrap into a grey
+           smear on a phone - so only a window of nine stays visible, sliding
+           with the active slide. The counter always carries the exact number. */
+        var win = window.innerWidth <= 760 ? 9 : 24;
+        var start = 0;
+        if (slides.length > win) {
+          start = clamp(index - Math.floor(win / 2), 0, slides.length - win);
+        }
+        Array.prototype.forEach.call(dots.children, function (li, i) {
+          var btn = li.firstElementChild;
+          if (!btn) return;
+          li.hidden = i < start || i >= start + win;
+          btn.classList.toggle('is-active', i === index);
+          if (i === index) btn.setAttribute('aria-current', 'true');
+          else btn.removeAttribute('aria-current');
+        });
       }
-      if (!setWidth) setWidth = 0;
+      if (count) count.textContent = slides.length ? index + 1 : 0;
+      if (total) total.textContent = slides.length;
+      if (prev) prev.disabled = slides.length < 2 || (!wraps && index === 0);
+      if (next) next.disabled = slides.length < 2 || (!wraps && index === slides.length - 1);
+      root.classList.toggle('is-single', slides.length < 2);
     }
 
-    function park() {
-      measure();
-      if (setWidth > 0) rail.scrollLeft = setWidth;
+    /* the scroll offset that puts one slide at the start of the snapport */
+    function offsetFor(slide) {
+      var pad = parseFloat(window.getComputedStyle(track).paddingLeft) || 0;
+      var box = track.getBoundingClientRect();
+      var s = slide.getBoundingClientRect();
+      return track.scrollLeft + (s.left - box.left) - pad;
     }
 
-    var settle = null;
-    function recentre() {
-      if (setWidth <= 0) return;
-      var x = rail.scrollLeft;
-      if (x < setWidth * 0.75) rail.scrollLeft = x + setWidth;
-      else if (x > setWidth * 1.75) rail.scrollLeft = x - setWidth;
-    }
-
-    rail.addEventListener('scroll', function () {
-      if (settle) window.clearTimeout(settle);
-      settle = window.setTimeout(recentre, 140);
-    }, { passive: true });
-
-    var step = function () { return Math.max(180, rail.clientWidth * 0.8); };
-
-    railBtns.forEach(function (btn) {
-      btn.disabled = false;
-      btn.addEventListener('click', function () {
-        var dir = btn.getAttribute('data-gal') === 'next' ? 1 : -1;
-        rail.scrollBy({ left: dir * step(), behavior: REDUCED.matches ? 'auto' : 'smooth' });
+    /* which slide the rail has actually come to rest on - a finger can land
+       anywhere, so this is measured against where each slide would sit when
+       it is the one snapped to the start of the strip */
+    function nearest() {
+      var pos = track.scrollLeft;
+      var best = 0;
+      var bestGap = Infinity;
+      slides.forEach(function (slide, i) {
+        var gap = Math.abs(offsetFor(slide) - pos);
+        if (gap < bestGap) { bestGap = gap; best = i; }
       });
-    });
+      return best;
+    }
 
-    rail.addEventListener('keydown', function (e) {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      e.preventDefault();
-      rail.scrollBy({
-        left: (e.key === 'ArrowRight' ? 1 : -1) * step(),
+    function stop() {
+      if (timer) { window.clearInterval(timer); timer = null; }
+    }
+
+    function start() {
+      stop();
+      if (!every || held || document.hidden) return;
+      if (slides.length < 2 || REDUCED.matches) return;
+      timer = window.setInterval(function () { goTo(index + 1); }, every);
+    }
+
+    function goTo(i) {
+      if (!slides.length) return;
+      if (wraps) i = (i + slides.length) % slides.length;
+      index = clamp(i, 0, slides.length - 1);
+      track.scrollTo({
+        left: offsetFor(slides[index]),
         behavior: REDUCED.matches ? 'auto' : 'smooth'
       });
+      paint();
+      start();
+    }
+
+    function refresh() {
+      var had = slides.length;
+      collect();
+      if (had !== slides.length) drawDots();
+      index = clamp(index, 0, Math.max(0, slides.length - 1));
+      paint();
+      start();
+    }
+
+    if (prev) prev.addEventListener('click', function () { goTo(index - 1); });
+    if (next) next.addEventListener('click', function () { goTo(index + 1); });
+
+    track.addEventListener('scroll', function () {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(function () {
+        queued = false;
+        var i = nearest();
+        if (i !== index) { index = i; paint(); }
+      });
+    }, { passive: true });
+
+    track.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); goTo(index + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(index - 1); }
+      else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
     });
 
-    // start on the middle set, and re-park if the layout changes
-    park();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(park);
-    window.addEventListener('load', park);
-    var resizeTimer = null;
-    window.addEventListener('resize', function () {
-      if (resizeTimer) window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(park, 180);
+    if (every) {
+      root.addEventListener('pointerenter', function () { held = true; stop(); });
+      root.addEventListener('pointerleave', function () { held = false; start(); });
+      root.addEventListener('focusin', function () { held = true; stop(); });
+      root.addEventListener('focusout', function () { held = false; start(); });
+      track.addEventListener('pointerdown', function () { stop(); });
+      track.addEventListener('pointerup', function () { start(); });
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stop(); else start();
+      });
+    }
+
+    collect();
+    drawDots();
+    paint();
+    start();
+
+    if ('ResizeObserver' in window) {
+      var resizing = false;
+      new ResizeObserver(function () {
+        if (resizing) return;
+        resizing = true;
+        window.requestAnimationFrame(function () {
+          resizing = false;
+          index = nearest();
+          paint();
+        });
+      }).observe(track);
+    }
+
+    return { refresh: refresh, goTo: goTo };
+  }
+
+  Array.prototype.slice.call(document.querySelectorAll('[data-carousel]')).forEach(function (root) {
+    var api = buildCarousel(root);
+    if (api) carousels.push(api);
+  });
+
+  /* The note photograph carries a second frame. A click, a tap or Enter on the
+     picture turns it over; nothing on the page announces it and the caption is
+     left exactly as it was. */
+  var flipCard = document.querySelector('[data-flip]');
+  if (flipCard) {
+    flipCard.addEventListener('click', function () {
+      var flipped = flipCard.classList.toggle('is-flipped');
+      flipCard.setAttribute('aria-pressed', String(flipped));
     });
   }
 
@@ -960,6 +1085,7 @@
       }
     }
     if (diyaNote && note) diyaNote.textContent = note;
+    refreshCarousels();   // the wall is a carousel now - rebuild its dots
   }
 
   function sendWish(w) {

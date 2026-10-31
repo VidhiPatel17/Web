@@ -123,8 +123,17 @@
   <section class="note" id="note" aria-labelledby="note-title">
     <div class="wrap note__grid">
       <figure class="note__photo reveal">
-        <span class="photo-frame">
-          <img src="assets/photos/couple-02.jpg" alt="Vidhi and Jay together at night" loading="lazy">
+        <span class="photo-frame note-flip">
+          <button class="note-flip__btn" type="button" data-flip aria-pressed="false" aria-label="Show the other photograph of Vidhi and Jay">
+            <span class="note-flip__inner">
+              <span class="note-flip__face">
+                <img src="assets/photos/couple-02.jpg" alt="Vidhi and Jay together at night" width="1050" height="1400" loading="lazy">
+              </span>
+              <span class="note-flip__face note-flip__face--back">
+                <img src="assets/photos/couple-01.jpg" alt="Vidhi and Jay together under strings of fairy lights" width="1050" height="1400" loading="lazy">
+              </span>
+            </span>
+          </button>
         </span>
         <figcaption>Us, on a good day</figcaption>
       </figure>
@@ -179,62 +188,68 @@
       <p class="sec-lede">A little glimpse of the two of us, and the days around us.</p>
     </header>
 
-    <div class="gallery-shell">
-      <button class="gallery-nav gallery-nav--prev" type="button" data-gal="prev" aria-label="Scroll the photographs left">&#8249;</button>
-      <div class="polaroids reveal" id="polaroids" tabindex="0" role="region" aria-label="Photographs of Vidhi and Jay" aria-describedby="galleryHint">
-        <button class="polaroid" type="button" data-photo="0" aria-label="Open photo: Vidhi and Jay together at night in a garden lit by fairy lights">
-          <span class="polaroid__frame"><img src="assets/photos/couple-01-sm.jpg" alt="Vidhi and Jay together at night in a garden lit by fairy lights" loading="lazy"></span>
-          <span class="polaroid__cap">Under the lights</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="1" aria-label="Open photo: Vidhi and Jay beside a flower-decorated car">
-          <span class="polaroid__frame"><img src="assets/photos/couple-02-sm.jpg" alt="Vidhi and Jay beside a flower-decorated car" loading="lazy"></span>
-          <span class="polaroid__cap">Beside the car</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="2" aria-label="Open photo: Vidhi and Jay together on a rooftop">
-          <span class="polaroid__frame"><img src="assets/photos/couple-03-sm.jpg" alt="Vidhi and Jay together on a rooftop" loading="lazy"></span>
-          <span class="polaroid__cap">Rooftop afternoon</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="3" aria-label="Open photo: Vidhi and Jay walking together by the water">
-          <span class="polaroid__frame"><img src="assets/photos/couple-04-sm.jpg" alt="Vidhi and Jay walking together by the water" loading="lazy"></span>
-          <span class="polaroid__cap">By the water</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="4" aria-label="Open photo: A close photograph of Vidhi and Jay together">
-          <span class="polaroid__frame"><img src="assets/photos/couple-05-sm.jpg" alt="A close photograph of Vidhi and Jay together" loading="lazy"></span>
-          <span class="polaroid__cap">Close</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="5" aria-label="Open photo: Vidhi and Jay standing together beside a building">
-          <span class="polaroid__frame"><img src="assets/photos/couple-06-sm.jpg" alt="Vidhi and Jay standing together beside a building" loading="lazy"></span>
-          <span class="polaroid__cap">The city</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="6" aria-label="Open photo: Vidhi and Jay together at night">
-          <span class="polaroid__frame"><img src="assets/photos/couple-07-sm.jpg" alt="Vidhi and Jay together at night" loading="lazy"></span>
-          <span class="polaroid__cap">Night out</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="7" aria-label="Open photo: Vidhi and Jay at a fairground at night">
-          <span class="polaroid__frame"><img src="assets/photos/couple-08-sm.jpg" alt="Vidhi and Jay at a fairground at night" loading="lazy"></span>
-          <span class="polaroid__cap">The fair</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="8" aria-label="Open photo: Vidhi and Jay together in festive clothes">
-          <span class="polaroid__frame"><img src="assets/photos/couple-09-sm.jpg" alt="Vidhi and Jay together in festive clothes" loading="lazy"></span>
-          <span class="polaroid__cap">Festive</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="9" aria-label="Open photo: Vidhi and Jay together under coloured lights">
-          <span class="polaroid__frame"><img src="assets/photos/couple-10-sm.jpg" alt="Vidhi and Jay together under coloured lights" loading="lazy"></span>
-          <span class="polaroid__cap">Colour and light</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="10" aria-label="Open photo: Vidhi and Jay together outdoors with balloons">
-          <span class="polaroid__frame"><img src="assets/photos/couple-11-sm.jpg" alt="Vidhi and Jay together outdoors with balloons" loading="lazy"></span>
-          <span class="polaroid__cap">Balloons</span>
-        </button>
-        <button class="polaroid" type="button" data-photo="11" aria-label="Open photo: Vidhi and Jay together with sparklers at night">
-          <span class="polaroid__frame"><img src="assets/photos/couple-12-sm.jpg" alt="Vidhi and Jay together with sparklers at night" loading="lazy"></span>
-          <span class="polaroid__cap">Sparks</span>
-        </button>
+    <div class="carousel carousel--frames" data-carousel data-autoplay="6500">
+      <div class="carousel__stage">
+        <button class="carousel__nav carousel__nav--prev" type="button" data-carousel-prev aria-label="Previous photographs">&#8249;</button>
+        <div class="polaroids carousel__track reveal" id="polaroids" data-carousel-track tabindex="0" role="group" aria-label="Photographs of Vidhi and Jay" aria-describedby="galleryHint">
+          <button class="polaroid" type="button" data-photo="0" aria-label="Open photo: Vidhi and Jay together at night in a garden lit by fairy lights">
+            <span class="polaroid__frame"><img src="assets/photos/couple-01-sm.jpg" alt="Vidhi and Jay together at night in a garden lit by fairy lights" loading="lazy"></span>
+            <span class="polaroid__cap">Under the lights</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="1" aria-label="Open photo: Vidhi and Jay beside a flower-decorated car">
+            <span class="polaroid__frame"><img src="assets/photos/couple-02-sm.jpg" alt="Vidhi and Jay beside a flower-decorated car" loading="lazy"></span>
+            <span class="polaroid__cap">Beside the car</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="2" aria-label="Open photo: Vidhi and Jay together on a rooftop">
+            <span class="polaroid__frame"><img src="assets/photos/couple-03-sm.jpg" alt="Vidhi and Jay together on a rooftop" loading="lazy"></span>
+            <span class="polaroid__cap">Rooftop afternoon</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="3" aria-label="Open photo: Vidhi and Jay walking together by the water">
+            <span class="polaroid__frame"><img src="assets/photos/couple-04-sm.jpg" alt="Vidhi and Jay walking together by the water" loading="lazy"></span>
+            <span class="polaroid__cap">By the water</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="4" aria-label="Open photo: A close photograph of Vidhi and Jay together">
+            <span class="polaroid__frame"><img src="assets/photos/couple-05-sm.jpg" alt="A close photograph of Vidhi and Jay together" loading="lazy"></span>
+            <span class="polaroid__cap">Close</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="5" aria-label="Open photo: Vidhi and Jay standing together beside a building">
+            <span class="polaroid__frame"><img src="assets/photos/couple-06-sm.jpg" alt="Vidhi and Jay standing together beside a building" loading="lazy"></span>
+            <span class="polaroid__cap">The city</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="6" aria-label="Open photo: Vidhi and Jay together at night">
+            <span class="polaroid__frame"><img src="assets/photos/couple-07-sm.jpg" alt="Vidhi and Jay together at night" loading="lazy"></span>
+            <span class="polaroid__cap">Night out</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="7" aria-label="Open photo: Vidhi and Jay at a fairground at night">
+            <span class="polaroid__frame"><img src="assets/photos/couple-08-sm.jpg" alt="Vidhi and Jay at a fairground at night" loading="lazy"></span>
+            <span class="polaroid__cap">The fair</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="8" aria-label="Open photo: Vidhi and Jay together in festive clothes">
+            <span class="polaroid__frame"><img src="assets/photos/couple-09-sm.jpg" alt="Vidhi and Jay together in festive clothes" loading="lazy"></span>
+            <span class="polaroid__cap">Festive</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="9" aria-label="Open photo: Vidhi and Jay together under coloured lights">
+            <span class="polaroid__frame"><img src="assets/photos/couple-10-sm.jpg" alt="Vidhi and Jay together under coloured lights" loading="lazy"></span>
+            <span class="polaroid__cap">Colour and light</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="10" aria-label="Open photo: Vidhi and Jay together outdoors with balloons">
+            <span class="polaroid__frame"><img src="assets/photos/couple-11-sm.jpg" alt="Vidhi and Jay together outdoors with balloons" loading="lazy"></span>
+            <span class="polaroid__cap">Balloons</span>
+          </button>
+          <button class="polaroid" type="button" data-photo="11" aria-label="Open photo: Vidhi and Jay together with sparklers at night">
+            <span class="polaroid__frame"><img src="assets/photos/couple-12-sm.jpg" alt="Vidhi and Jay together with sparklers at night" loading="lazy"></span>
+            <span class="polaroid__cap">Sparks</span>
+          </button>
       </div>
-      <button class="gallery-nav gallery-nav--next" type="button" data-gal="next" aria-label="Scroll the photographs right">&#8250;</button>
+        <button class="carousel__nav carousel__nav--next" type="button" data-carousel-next aria-label="Next photographs">&#8250;</button>
+      </div>
+      <div class="carousel__bar">
+        <p class="carousel__count"><span data-carousel-count>1</span><i aria-hidden="true">/</i><span data-carousel-total>12</span></p>
+        <ol class="carousel__dots" data-carousel-dots aria-label="Choose a photograph"></ol>
+      </div>
     </div>
 
-    <p class="frames__hint" id="galleryHint"><b>Drag, swipe or use the arrows — then tap a photograph to open it.</b></p>
+    <p class="frames__hint" id="galleryHint"><b>Swipe, drag or use the dots and arrows &mdash; then tap a photograph to open it.</b></p>
   </section>
 
   <!-- ======================================================== JOURNEY -->
@@ -534,7 +549,18 @@
         <p class="diyas__names" id="diyaNames"></p>
       </div>
 
-      <ul class="diyas" id="diyaWall" aria-label="Blessings from our guests"></ul>
+      <div class="carousel carousel--diyas" data-carousel>
+        <div class="carousel__stage">
+          <button class="carousel__nav carousel__nav--prev" type="button" data-carousel-prev aria-label="Previous blessings">&#8249;</button>
+          <ul class="diyas carousel__track" id="diyaWall" data-carousel-track aria-label="Blessings from our guests"></ul>
+          <button class="carousel__nav carousel__nav--next" type="button" data-carousel-next aria-label="More blessings">&#8250;</button>
+        </div>
+        <div class="carousel__bar">
+          <p class="carousel__count"><span data-carousel-count>0</span><i aria-hidden="true">/</i><span data-carousel-total>0</span></p>
+          <ol class="carousel__dots" data-carousel-dots aria-label="Choose a blessing"></ol>
+        </div>
+      </div>
+
       <p class="diyas__empty" id="diyaEmpty">The wall is dark. Light the first diya.</p>
       <p class="diyas__note" id="diyaNote">Our guest book &mdash; everyone who visits sees this list.</p>
     </div>
